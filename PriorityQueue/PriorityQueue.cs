@@ -95,7 +95,7 @@ namespace PriorityQueue
 
         private void BubbleDown(int parentIndex)
         {
-            while (!IsLeaf(parentIndex))
+            while (!IsLeaf(parentIndex, Count))
             {
                 int leftChildIndex = LeftChild(parentIndex);
                 int rightChildIndex = RightChild(parentIndex);
@@ -132,27 +132,27 @@ namespace PriorityQueue
             }
         }
 
-        private int LeftChild(int index)
+        private static int LeftChild(int index)
         {
             return (2 * index) + 1;
         }
 
-        private int RightChild(int index)
+        private static int RightChild(int index)
         {
             return (2 * index) + 2;
         }
 
-        private int Parent(int index)
+        private static int Parent(int index)
         {
             return (index - 1) / 2;
         }
 
-        private bool IsLeaf(int index)
+        private static bool IsLeaf(int index, int count)
         {
-            return (index >= Count / 2) && (index < Count);
+            return (index >= count / 2) && (index < count);
         }
 
-        private bool IsRoot(int index)
+        private static bool IsRoot(int index)
         {
             return index == 0;
         }
