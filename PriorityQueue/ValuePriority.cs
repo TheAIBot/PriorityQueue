@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PriorityQueue
+﻿namespace PriorityQueue
 {
     public readonly struct ValuePriority<T, TPriority>
     {
