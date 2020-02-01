@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PriorityQueue
 {
+    [DebuggerDisplay("Count = {Count}")]
     public class PriorityQueue<T, TPriority>
     {
         private ValuePriority<T, TPriority>[] Heap = new ValuePriority<T, TPriority>[1];
@@ -44,7 +47,7 @@ namespace PriorityQueue
         {
             if (Count == 0)
             {
-                throw new InvalidOperationException("The priority queue is empty");
+                throw new InvalidOperationException(Properties.Resources.InvalidOperation_PriorityQueueEmpty);
             }
 
             return Heap[0];
@@ -59,7 +62,7 @@ namespace PriorityQueue
         {
             if (Count == 0)
             {
-                throw new InvalidOperationException("The priority queue is empty");
+                throw new InvalidOperationException(Properties.Resources.InvalidOperation_PriorityQueueEmpty);
             }
 
             var top = Heap[0];
