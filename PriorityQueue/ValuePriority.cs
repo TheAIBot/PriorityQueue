@@ -1,19 +1,47 @@
-﻿namespace PriorityQueue
+﻿using System;
+using System.Diagnostics;
+
+namespace PriorityQueue
 {
-    public readonly struct ValuePriority<T, TPriority>
+    [DebuggerDisplay("[Value: {Value}, Priority: {Priority}]")]
+    public readonly struct ValuePriority<T, TPriority> : System.IEquatable<ValuePriority<T, TPriority>>
     {
-        public readonly T Value;
-        public readonly TPriority Priority;
+        public T Value { get; }
+        public TPriority Priority { get; }
 
         public ValuePriority(T value, TPriority priority)
         {
-            this.Value = value;
-            this.Priority = priority;
+            Value = value;
+            Priority = priority;
         }
 
-        public override string ToString()
+        public override bool Equals(object obj)
         {
-            return $"[Value: {Value}, Priority: {Priority}]";
+            if (obj is ValuePriority<T, TPriority> vp)
+            {
+                return Equals(vp);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Value, Priority);
+        }
+
+        public static bool operator ==(ValuePriority<T, TPriority> left, ValuePriority<T, TPriority> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ValuePriority<T, TPriority> left, ValuePriority<T, TPriority> right)
+        {
+            return !(left == right);
+        }
+
+        public bool Equals(ValuePriority<T, TPriority> other)
+        {
+            return Value.Equals(other.Value) && Priority.Equals(other.Priority);
         }
     }
 }
