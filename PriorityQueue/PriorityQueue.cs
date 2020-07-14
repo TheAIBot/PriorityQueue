@@ -73,12 +73,39 @@ namespace PriorityQueue
             return top;
         }
 
+        public bool TryRemoveFirstOrDefault(Func<T, bool> condition, out T value)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                if (condition(Heap[i].Value))
+                {
+                    value = Heap[i].Value;
+                    Heap[i] = Heap[Count - 1];
+                    Count--;
+
+                    //try move value up in the tree
+                    int index = BubbleUp(i);
+                   
+                    //if it didn't move up then try move it down
+                    if (index == i)
+                    {
+                        BubbleDown(i);
+                    }
+
+                    return true;
+                }
+            }
+
+            value = default(T);
+            return false;
+        }
+
         private void ExpandHeap()
         {
             Array.Resize(ref Heap, Count * 2 + 1);
         }
 
-        private void BubbleUp(int childIndex)
+        private int BubbleUp(int childIndex)
         {
             while (!IsRoot(childIndex))
             {
@@ -94,6 +121,18 @@ namespace PriorityQueue
                 Heap[childIndex] = parent;
                 childIndex = parentIndex;
             }
+
+            return childIndex;
+        }
+
+        private ValuePriority<T, TPriority> ExtractFrom(int index)
+        {
+            var top = Heap[index];
+            Heap[index] = Heap[Count - 1];
+            Count--;
+            BubbleDown(index);
+
+            return top;
         }
 
         private void BubbleDown(int parentIndex)
