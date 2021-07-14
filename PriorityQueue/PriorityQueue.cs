@@ -137,6 +137,8 @@ namespace PriorityQueue
 
         private void BubbleDown(int parentIndex)
         {
+            var parent = Heap[parentIndex];
+
             while (!IsLeaf(parentIndex, Count))
             {
                 int leftChildIndex = LeftChild(parentIndex);
@@ -146,32 +148,223 @@ namespace PriorityQueue
                     break;
                 }
 
+                var bestChild = Heap[leftChildIndex];
                 int bestChildIndex = leftChildIndex;
                 //If both childs are valid then the best child
                 //between the two will be chosen. Otherwise the
                 //old valid child will be the best child.
                 if (rightChildIndex < Count)
                 {
-                    var leftChild = Heap[leftChildIndex];
                     var rightChild = Heap[rightChildIndex];
 
-                    if (ValueComparar.Compare(leftChild.Priority, rightChild.Priority) > 0)
+                    if (ValueComparar.Compare(bestChild.Priority, rightChild.Priority) > 0)
                     {
+                        bestChild = rightChild;
                         bestChildIndex = rightChildIndex;
                     }
                 }
 
-                var bestChild = Heap[bestChildIndex];
-                var parent = Heap[parentIndex];
                 if (ValueComparar.Compare(parent.Priority, bestChild.Priority) <= 0)
                 {
                     break;
                 }
 
                 Heap[parentIndex] = bestChild;
-                Heap[bestChildIndex] = parent;
                 parentIndex = bestChildIndex;
             }
+
+            Heap[parentIndex] = parent;
+        }
+
+        private static int LeftChild(int index)
+        {
+            return (2 * index) + 1;
+        }
+
+        private static int RightChild(int index)
+        {
+            return (2 * index) + 2;
+        }
+
+        private static int Parent(int index)
+        {
+            return (index - 1) / 2;
+        }
+
+        private static bool IsLeaf(int index, int count)
+        {
+            return (index >= count / 2) && (index < count);
+        }
+
+        private static bool IsRoot(int index)
+        {
+            return index == 0;
+        }
+    }
+
+    [DebuggerDisplay("Count = {Count}")]
+    public class PriorityQueue<T>
+    {
+        private ValuePriority<T, int>[] Heap = new ValuePriority<T, int>[1];
+        public int Count { get; private set; } = 0;
+
+        public PriorityQueue()
+        {
+        }
+
+        public void Enqueue(T t, int priority)
+        {
+            if (Count == Heap.Length)
+            {
+                ExpandHeap();
+            }
+
+            Heap[Count] = new ValuePriority<T, int>(t, priority);
+            BubbleUp(Count);
+            Count++;
+        }
+
+        public T Peek()
+        {
+            return PeekWithPriority().Value;
+        }
+
+        public int PeekPriority()
+        {
+            return PeekWithPriority().Priority;
+        }
+
+        public ValuePriority<T, int> PeekWithPriority()
+        {
+            if (Count == 0)
+            {
+                throw new InvalidOperationException(Properties.Resources.InvalidOperation_PriorityQueueEmpty);
+            }
+
+            return Heap[0];
+        }
+
+        public T Dequeue()
+        {
+            return DequeueWithPriority().Value;
+        }
+
+        public ValuePriority<T, int> DequeueWithPriority()
+        {
+            if (Count == 0)
+            {
+                throw new InvalidOperationException(Properties.Resources.InvalidOperation_PriorityQueueEmpty);
+            }
+
+            var top = Heap[0];
+            Heap[0] = Heap[Count - 1];
+            Count--;
+            BubbleDown(0);
+
+            return top;
+        }
+
+        public bool TryRemoveFirstOrDefault(Func<T, bool> condition, out T value)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                if (condition(Heap[i].Value))
+                {
+                    value = Heap[i].Value;
+                    Heap[i] = Heap[Count - 1];
+                    Count--;
+
+                    //try move value up in the tree
+                    int index = BubbleUp(i);
+
+                    //if it didn't move up then try move it down
+                    if (index == i)
+                    {
+                        BubbleDown(i);
+                    }
+
+                    return true;
+                }
+            }
+
+            value = default(T);
+            return false;
+        }
+
+        private void ExpandHeap()
+        {
+            Array.Resize(ref Heap, Count * 2 + 1);
+        }
+
+        private int BubbleUp(int childIndex)
+        {
+            while (!IsRoot(childIndex))
+            {
+                int parentIndex = Parent(childIndex);
+                var child = Heap[childIndex];
+                var parent = Heap[parentIndex];
+                if (child.Priority - parent.Priority >= 0)
+                {
+                    break;
+                }
+
+                Heap[parentIndex] = child;
+                Heap[childIndex] = parent;
+                childIndex = parentIndex;
+            }
+
+            return childIndex;
+        }
+
+        private ValuePriority<T, int> ExtractFrom(int index)
+        {
+            var top = Heap[index];
+            Heap[index] = Heap[Count - 1];
+            Count--;
+            BubbleDown(index);
+
+            return top;
+        }
+
+        private void BubbleDown(int parentIndex)
+        {
+            var parent = Heap[parentIndex];
+
+            while (!IsLeaf(parentIndex, Count))
+            {
+                int leftChildIndex = LeftChild(parentIndex);
+                int rightChildIndex = RightChild(parentIndex);
+                if (leftChildIndex >= Count)
+                {
+                    break;
+                }
+
+                var bestChild = Heap[leftChildIndex];
+                int bestChildIndex = leftChildIndex;
+                //If both childs are valid then the best child
+                //between the two will be chosen. Otherwise the
+                //old valid child will be the best child.
+                if (rightChildIndex < Count)
+                {
+                    var rightChild = Heap[rightChildIndex];
+
+                    if (bestChild.Priority - rightChild.Priority > 0)
+                    {
+                        bestChild = rightChild;
+                        bestChildIndex = rightChildIndex;
+                    }
+                }
+
+                if (parent.Priority - bestChild.Priority <= 0)
+                {
+                    break;
+                }
+
+                Heap[parentIndex] = bestChild;
+                parentIndex = bestChildIndex;
+            }
+
+            Heap[parentIndex] = parent;
         }
 
         private static int LeftChild(int index)
